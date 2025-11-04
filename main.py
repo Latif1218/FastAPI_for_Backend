@@ -34,10 +34,19 @@ while True:
 
 @app.post("/post")
 def create_post(post: Course):
-    cursor.execute(""" INSERT INTO course(name, instructor, duration, website) VALUES(%s,%s,%s,%s)""", (post.name, post.instructor, post.duration, post.website))
-    new_post = cursor.fetchone()
-    conn.commit()
-    return {"data": new_post}
+    try:
+        cursor.execute(
+            """INSERT INTO course (name, instructor, duration, website)
+            VALUES (%s, %s, %s, %s) RETURNING *""",
+            (post.name, post.instructor, post.duration, str(post.website))
+        )
+        new_post = cursor.fetchone()
+        conn.commit()
+        return {"data": new_post}
+    except Exception as e:
+        conn.rollback()
+        print("❌ Error inserting data:", e)
+        return {"error": str(e)}
 
 @app.get("/course")
 def studymart():

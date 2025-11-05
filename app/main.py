@@ -50,7 +50,7 @@ def create_post(post: Course):
         return {"data": new_post}
     except Exception as e:
         conn.rollback()
-        print("❌ Error inserting data:", e)
+        print("Error inserting data:", e)
         return {"error": str(e)}
 
 @app.get("/course")

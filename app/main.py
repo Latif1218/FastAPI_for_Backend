@@ -119,7 +119,50 @@ def update_course(id: int, course: Course):
 
 @app.get("/coursealchemy")
 def course(db:Session = Depends(get_db)):
-    return {"status": "sqlalchemy ORM working"}
+    course = db.query(models.Course).all()
+    return {"Course": course}
+
+
+@app.get("/coursealchemy/{id}")
+def aiquest_course(id:int, db: Session = Depends(get_db)):
+    course = db.query(models.Course).filter(models.Course.id == id).first()
+    if not course:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail= f"Course with Id:{id} was not found"
+        )
+    return{"course_detail": course}
+
+
+@app.put("/aiquest_course/{id}")
+def update_aiquest_course(id:int, updated_course: Course, db:Session=Depends(get_db)):
+    course_query = db.query(models.Course).filter(models.Course.id==id)
+    course = course_query.first()
+
+    if not course:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Course with id: {id} not found"
+        )
+    update_data = updated_course.model_dump()
+    update_data["website"] = str(update_data["website"])
+    course_query.update(update_data, synchronize_session=False)
+    db.commit()
+    db.refresh(course)
+    return {"Course detail": course}
+
+
+
+@app.delete("/aiquest_course_delete/{id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_aiquest_course(id:int, db:Session=Depends(get_db)):
+    course_query = db.query(models.Course).filter(models.Course.id==id)
+    course = course_query.first()
+    if not course:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"course with id: {id} does not exixt")
+    course_query.delete(synchronize_session=False)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
 
 
 @app.post("/courses")
@@ -134,6 +177,9 @@ def create_course(course: Course,db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_course)
     return {"Course: ", new_course}
+
+
+
 
 
     

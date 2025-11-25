@@ -1,7 +1,6 @@
 from fastapi import FastAPI
-from pydantic import BaseModel, HttpUrl
-
-
+from pydantic import BaseModel, HttpUrl, EmailStr
+from datetime import datetime
 
 
 
@@ -18,3 +17,17 @@ class CourseResponse(CourseCreate):
 
     class Config:
         orm_model = True
+
+
+
+class UserCreate(BaseModel):
+    email : EmailStr
+    password : str
+
+class UserRes(BaseModel):
+    id: int
+    email : EmailStr
+    created_at : datetime
+
+    class Config:
+        orrm_model = True

@@ -5,9 +5,11 @@ from .. database import get_db
 from typing import List
 from fastapi import HTTPException
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/course"
+)
 
-@router.post("/courses", response_model=schemas.CourseResponse)
+@router.post("/", response_model=schemas.CourseResponse)
 def create_course(course: schemas.CourseCreate,db: Session = Depends(get_db)):
     new_course = models.Course(**course.model_dump())
     new_course.website = str(course.website)
@@ -17,13 +19,13 @@ def create_course(course: schemas.CourseCreate,db: Session = Depends(get_db)):
     return new_course
 
 
-@router.get("/coursealchemy", response_model= List[schemas.CourseCreate])
+@router.get("/", response_model= List[schemas.CourseCreate])
 def course(db:Session = Depends(get_db)):
     courses = db.query(models.Course).all()
     return courses
 
 
-@router.get("/coursealchemy/{id}", response_model=schemas.CourseCreate)
+@router.get("/{id}", response_model=schemas.CourseCreate)
 def aiquest_course(id:int, db: Session = Depends(get_db)):
     course = db.query(models.Course).filter(models.Course.id == id).first()
     if not course:
@@ -34,7 +36,7 @@ def aiquest_course(id:int, db: Session = Depends(get_db)):
     return course
 
 
-@router.delete("/aiquest_course_delete/{id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_aiquest_course(id:int, db:Session=Depends(get_db)):
     course_query = db.query(models.Course).filter(models.Course.id==id)
     course = course_query.first()
@@ -45,7 +47,7 @@ def delete_aiquest_course(id:int, db:Session=Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.put("/aiquest_course/{id}", response_model=schemas.CourseResponse)
+@router.put("/{id}", response_model=schemas.CourseResponse)
 def update_aiquest_course(id:int, updated_course: schemas.CourseCreate, db:Session=Depends(get_db)):
     course_query = db.query(models.Course).filter(models.Course.id==id)
     course = course_query.first()

@@ -31,3 +31,9 @@ class UserRes(BaseModel):
 
     class Config:
         orrm_model = True
+
+
+class UserLogin(BaseModel):
+    email : EmailStr
+    password : str 
+    
